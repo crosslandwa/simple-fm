@@ -3,7 +3,10 @@ window.addEventListener('load', onLoad)
 function onLoad() {
   const audioContext = new(window.AudioContext || window.webkitAudioContext);
   const { audioParam, multiply, oscillator } = operatorFactory(audioContext)
+  const nowMs = () => audioContext.currentTime * 1000
+  const connectToOutput = node => node.connect(audioContext.destination)
 
+  const carrierAmplitude = audioParam(0)
   const carrierFrequency = audioParam(0)
   const harmonicityRatio = audioParam(0)
   const modulationIndex = audioParam(0)
@@ -13,27 +16,21 @@ function onLoad() {
     oscillator([carrierFrequencyTimesHarmonicityRatio]),
     multiply(carrierFrequencyTimesHarmonicityRatio, modulationIndex)
   )
-
   const carrier = oscillator([carrierFrequency, modulator])
 
-  const masterGain = audioContext.createGain()
-  masterGain.gain.setValueAtTime(0, 0)
-  masterGain.connect(audioContext.destination)
-
-  carrier.connect(masterGain)
-
-  const nowMs = () => audioContext.currentTime * 1000
+  connectToOutput(multiply(carrier, carrierAmplitude))
 
   const playNote = ({ amplitude, pitch, modIndex, harmonicity }) => {
-    [carrierFrequency.gain, masterGain.gain, modulationIndex.gain, harmonicityRatio.gain]
+    [carrierFrequency.gain, carrierAmplitude.gain, modulationIndex.gain, harmonicityRatio.gain]
       .forEach(param => param.cancelAndHoldAtTime(0))
 
     const coerceToEnvelope = x => x.length ? x : [[x, 0]]
+    const atTimeMs = nowMs()
 
-    pitch && applyEnvelope(carrierFrequency.gain, nowMs(), ...coerceToEnvelope(pitch))
-    amplitude && applyEnvelope(masterGain.gain, nowMs(), ...coerceToEnvelope(amplitude))
-    modIndex && applyEnvelope(modulationIndex.gain, nowMs(), ...coerceToEnvelope(modIndex))
-    harmonicity && applyEnvelope(harmonicityRatio.gain, nowMs(), ...coerceToEnvelope(harmonicity))
+    pitch && applyEnvelope(carrierFrequency.gain, atTimeMs, ...coerceToEnvelope(pitch))
+    amplitude && applyEnvelope(carrierAmplitude.gain, atTimeMs, ...coerceToEnvelope(amplitude))
+    modIndex && applyEnvelope(modulationIndex.gain, atTimeMs, ...coerceToEnvelope(modIndex))
+    harmonicity && applyEnvelope(harmonicityRatio.gain, atTimeMs, ...coerceToEnvelope(harmonicity))
   }
 
   window.addEventListener('keypress', ({ key }) => {
@@ -75,8 +72,8 @@ const operatorFactory = audioContext => ({
   }
 })
 
-const applyEnvelope = (param, whenMs, ...envelopePoints) => {
-  let totalTime = whenMs / 1000
+const applyEnvelope = (param, atTimeMs, ...envelopePoints) => {
+  let totalTime = atTimeMs / 1000
   envelopePoints.forEach(([level, time]) => {
     totalTime += (time / 1000)
     // param.exponentialRampToValueAtTime(level, totalTime) // THIS WON'T WORK WHEN THE CURRENT VALUE OR TARGET VALUE IS ZERO!
