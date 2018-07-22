@@ -33,10 +33,22 @@ function onLoad() {
     harmonicity && applyEnvelope(harmonicityRatio.gain, atTimeMs, ...coerceToEnvelope(harmonicity))
   }
 
+  let state = nextState()
+
+  const clear = setInterval(() => {
+    console.log(state)
+    playNote(state)
+    state = nextState(state)
+  }, 100)
+
   window.addEventListener('keypress', ({ key }) => {
+    if (' ' === key) {
+      clearInterval(clear)
+      return
+    }
     if (!['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'k'].includes(key)) return
     const noteNumber = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j:11, k: 12 }[key]
-    const midiNoteToF = note => 440.0 * Math.pow(2, (note - 69.0) / 12.0)
+
     const frequency = midiNoteToF(noteNumber + 48)
     playNote({
       amplitude: [[0, 10], [0.9, 10], [0, 500]],
@@ -45,6 +57,39 @@ function onLoad() {
       harmonicity: 4.99
     })
   })
+}
+
+const midiNoteToF = note => 440.0 * Math.pow(2, (note - 69.0) / 12.0)
+
+const nextState = (state = initialState) => Object.assign({}, state, {
+  amplitude: [[0, 5], [1, 5], [0.3, 10], [0, 100]],
+  pitch: [[50, 1], [8000, 5], [80, 5], [50, 100]],
+  modIndex: scaleEnvelope(shiftEnvelope(randomEnvelope(3, 150), 1.5), 100),
+  harmonicity: scaleEnvelope(randomEnvelope(10, 150), 5)
+})
+
+const randomInt = max => Math.floor(Math.random() * (max + 1))
+
+const randomEnvelope = (maxSteps, length) => stretchEnvelope(randomNormalisedEnvelope(randomInt(maxSteps)), length)
+
+const randomNormalisedEnvelope = steps => {
+  const x = [...Array(steps)].map((u, i) => i)
+  const lengths = x.map(i => Math.random())
+  const totalLength = lengths.reduce((total, it) => total + it, 0)
+  return x.map(i => {
+    return [Math.random(), lengths[i] / totalLength]
+  })
+}
+
+const scaleEnvelope = (env, scaleFactor) => env.map(([a, b]) => [a * scaleFactor, b])
+const shiftEnvelope = (env, shiftAmount) => env.map(([a, b]) => [a + shiftAmount, b])
+const stretchEnvelope = (env, stretchFactor) => env.map(([a, b]) => [a, b * stretchFactor])
+
+const initialState = {
+  amplitude: [[0, 10], [0.9, 10], [0, 500]],
+  pitch: [[440, 0], [0.5 * 440, 50]],
+  modIndex: [[0, 10], [1, 50],[0.5, 100], [0.1, 500]],
+  harmonicity: 4.99
 }
 
 const operatorFactory = audioContext => ({
