@@ -1,10 +1,7 @@
 window.addEventListener('load', onLoad)
 
-function onLoad() {
-  const audioContext = new(window.AudioContext || window.webkitAudioContext);
-  const { audioParam, multiply, oscillator } = operatorFactory(audioContext)
-  const nowMs = () => audioContext.currentTime * 1000
-  const connectToOutput = node => node.connect(audioContext.destination)
+function fmSynth(operatorFactory) {
+  const { audioParam, multiply, oscillator, nowMs } = operatorFactory
 
   const carrierAmplitude = audioParam(0)
   const carrierFrequency = audioParam(0)
@@ -17,8 +14,7 @@ function onLoad() {
     multiply(carrierFrequencyTimesHarmonicityRatio, modulationIndex)
   )
   const carrier = oscillator([carrierFrequency, modulator])
-
-  connectToOutput(multiply(carrier, carrierAmplitude))
+  const output = multiply(carrier, carrierAmplitude)
 
   const playNote = ({ amplitude, pitch, modIndex, harmonicity }) => {
     [carrierFrequency.gain, carrierAmplitude.gain, modulationIndex.gain, harmonicityRatio.gain]
@@ -33,11 +29,20 @@ function onLoad() {
     harmonicity && applyEnvelope(harmonicityRatio.gain, atTimeMs, ...coerceToEnvelope(harmonicity))
   }
 
+  return { playNote, connect: destination => output.connect(destination) }
+}
+
+function onLoad() {
+  const audioContext = new(window.AudioContext || window.webkitAudioContext);
+  const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory(audioContext))
+  connectFm1(audioContext.destination)
+
+
   let state = nextState()
 
   const clear = setInterval(() => {
     console.log(state)
-    playNote(state)
+    playFm1(state)
     state = nextState(state)
   }, 100)
 
@@ -50,7 +55,7 @@ function onLoad() {
     const noteNumber = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j:11, k: 12 }[key]
 
     const frequency = midiNoteToF(noteNumber + 48)
-    playNote({
+    playFm1({
       amplitude: [[0, 10], [0.9, 10], [0, 500]],
       pitch: [[frequency, 0], [0.5 * frequency, 50]],
       modIndex: [[0, 10], [1, 50],[0.5, 100], [0.1, 500]],
@@ -114,7 +119,8 @@ const operatorFactory = audioContext => ({
     a.connect(node)
     b.connect(node.gain)
     return node
-  }
+  },
+  nowMs: () => audioContext.currentTime * 1000
 })
 
 const applyEnvelope = (param, atTimeMs, ...envelopePoints) => {
