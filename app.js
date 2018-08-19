@@ -35,32 +35,37 @@ function fmSynth(operatorFactory) {
 function onLoad() {
   const audioContext = new(window.AudioContext || window.webkitAudioContext);
   const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory(audioContext))
+  const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory(audioContext))
   connectFm1(audioContext.destination)
-
+  connectFm2(audioContext.destination)
 
   let state = nextState()
-
-  const clear = setInterval(() => {
-    console.log(state)
-    playFm1(state)
-    state = nextState(state)
-  }, 100)
+  let clear;
+  const startPlaying = () => { playFm1(state); state = nextState(state); }
+  const togglePlaying = () => {
+    if (clear) {
+      clearInterval(clear)
+      clear = undefined
+    } else {
+      clear = setInterval(startPlaying, 100)
+    }
+  }
 
   window.addEventListener('keypress', ({ key }) => {
     if (' ' === key) {
-      clearInterval(clear)
+      togglePlaying()
       return
     }
-    if (!['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'k'].includes(key)) return
     const noteNumber = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j:11, k: 12 }[key]
-
-    const frequency = midiNoteToF(noteNumber + 48)
-    playFm1({
-      amplitude: [[0, 10], [0.9, 10], [0, 500]],
-      pitch: [[frequency, 0], [0.5 * frequency, 50]],
-      modIndex: [[0, 10], [1, 50],[0.5, 100], [0.1, 500]],
-      harmonicity: 4.99
-    })
+    if (noteNumber >= 0) {
+      const frequency = midiNoteToF(noteNumber + 48)
+      playFm2({
+        amplitude: [[0, 10], [0.9, 10], [0, 500]],
+        pitch: [[frequency, 0], [0.5 * frequency, 50]],
+        modIndex: [[0, 10], [1, 50],[0.5, 100], [0.1, 500]],
+        harmonicity: 4.99
+      })
+    }
   })
 }
 
