@@ -36,8 +36,11 @@ function onLoad() {
   const audioContext = new(window.AudioContext || window.webkitAudioContext);
   const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory(audioContext))
   const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory(audioContext))
+  const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory(audioContext))
   connectFm1(audioContext.destination)
   connectFm2(audioContext.destination)
+  connectFm3(audioContext.destination)
+  playWithLSystem(playFm3)
 
   let state = nextState()
   let clear;
@@ -135,4 +138,30 @@ const applyEnvelope = (param, atTimeMs, ...envelopePoints) => {
     // param.exponentialRampToValueAtTime(level, totalTime) // THIS WON'T WORK WHEN THE CURRENT VALUE OR TARGET VALUE IS ZERO!
     param.linearRampToValueAtTime(level, totalTime)
   })
+}
+
+
+/** L SYSTEM stuff **/
+
+const lSystem = (axiom, iterations, rules) => [...Array(iterations).keys()]
+  .reduce(acc => acc.split('').map(c => rules[c] ? rules[c]() : c).join(''), axiom)
+
+const playWithLSystem = play => {
+  const amplitude = (lSystem('A', 5, {
+    A: () => 'ABAA',
+    B: () => 'BBB'
+  }) + 'B').split('').reduce((acc, i) => acc.concat({
+    A: [[1, 100]],
+    B: [[0, 100]]
+  }[i]), [])
+
+  const pitch = lSystem('3', 9, {
+    2: () => '2',
+    3: () => '357',
+    5: () => '525',
+    7: () => '39',
+    9: () => '957'
+  }).split('').map(i => parseInt(i) + 48).reduce((acc, i) => acc.concat([[midiNoteToF(i), 1], [midiNoteToF(i), 250]]), [])
+
+  play({amplitude, pitch, modIndex: [[1, 0], [3.5, 100000]], harmonicity: [[9.99, 0], [0.99, 100000]]})
 }
