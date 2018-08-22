@@ -169,7 +169,7 @@ const playWithLSystem = play => {
       B: [[1, 10], [0, 240]],
       C: [[1, 245], [0, 5]],
       D: [[0.5, 10], [0, 40], [0, 200]]
-    }[key] || [[0, 0], [0, 500], [1, 1000]]
+    }[key] || [[0, 0], [0, 500]]
   }
 
   // const amplitude = lSystem('A', 5, {
@@ -177,11 +177,13 @@ const playWithLSystem = play => {
   //   B: () => 'BBA'
   // }).split('').reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
 
-  const amplitude = randomLSystem().apply(5).split('').reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
+  const amplitude = randomLSystem(6).apply(5).split('').reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
 
   const pitchSegment = key => {
     const noteNumber = { A: 2, B: 3, C: 5, D: 7, E: 9, F: 12, G: 15, H: 24 }[key] || 7
-    return [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 249]]
+    return Math.random() > 0.5
+      ? [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 124]]
+      : [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 249]]
   }
 
   // const pitch = lSystem('A', 9, {
@@ -197,14 +199,14 @@ const playWithLSystem = play => {
   const modIndexSegment = key => {
     return {
       A: [[35, 10], [1000, 25], [10, 5000]],
-      B: [[1, 250]],
+      B: [[10, 250]],
       C: [[500, 250]],
-      D: [[1.99, 250], [9.99, 500]],
-    }[key] || [[0, 0], [0, 500], [1, 1000]]
+      D: [[19.99, 250], [9.99, 500]],
+    }[key] || [[0, 0], [1, 500], [10, 1000]]
   }
 
-  const modIndex = randomLSystem().apply(6).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
-  const harmonicity = randomLSystem().apply(5).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
+  const modIndex = randomLSystem(5).apply(6).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
+  const harmonicity = randomLSystem(5).apply(5).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
 
   play({amplitude, pitch, modIndex, harmonicity })
 }
