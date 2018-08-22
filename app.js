@@ -50,7 +50,7 @@ function onLoad() {
       clearInterval(clear)
       clear = undefined
     } else {
-      clear = setInterval(startPlaying, 100)
+      clear = setInterval(startPlaying, 125)
     }
   }
 
@@ -146,22 +146,65 @@ const applyEnvelope = (param, atTimeMs, ...envelopePoints) => {
 const lSystem = (axiom, iterations, rules) => [...Array(iterations).keys()]
   .reduce(acc => acc.split('').map(c => rules[c] ? rules[c]() : c).join(''), axiom)
 
+const randomLSystem = (alphabetMaxSize = 4, ruleTransformationMaxSize = 3) => {
+  const alphabetSize = Math.floor(Math.random() * alphabetMaxSize) + 2
+  const ruleSize = () => Math.floor(Math.random() * ruleTransformationMaxSize) + 2
+  const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].slice(0, alphabetSize)
+  const randomChar = () => alphabet[Math.floor(Math.random() * alphabet.length)]
+  const rules = alphabet.reduce((acc, char) => {
+    const mapping = [...new Array(ruleSize()).keys()].map(randomChar).join('')
+    return Object.assign(acc, { [char]: () => mapping })
+  }, {})
+  return {
+    axiom: alphabet[0],
+    rules,
+    apply: iterations => lSystem(alphabet[0], iterations, rules)
+  }
+}
+
 const playWithLSystem = play => {
-  const amplitude = (lSystem('A', 5, {
-    A: () => 'ABAA',
-    B: () => 'BBB'
-  }) + 'B').split('').reduce((acc, i) => acc.concat({
-    A: [[1, 100]],
-    B: [[0, 100]]
-  }[i]), [])
+  const amplitudeSegment = key => {
+    return {
+      A: [[1, 10], [0.5, 100], [0, 140]],
+      B: [[1, 10], [0, 240]],
+      C: [[1, 245], [0, 5]],
+      D: [[0.5, 10], [0, 40], [0, 200]]
+    }[key] || [[0, 0], [0, 500], [1, 1000]]
+  }
 
-  const pitch = lSystem('3', 9, {
-    2: () => '2',
-    3: () => '357',
-    5: () => '525',
-    7: () => '39',
-    9: () => '957'
-  }).split('').map(i => parseInt(i) + 48).reduce((acc, i) => acc.concat([[midiNoteToF(i), 1], [midiNoteToF(i), 250]]), [])
+  // const amplitude = lSystem('A', 5, {
+  //   A: () => 'ABABB',
+  //   B: () => 'BBA'
+  // }).split('').reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
 
-  play({amplitude, pitch, modIndex: [[1, 0], [3.5, 100000]], harmonicity: [[9.99, 0], [0.99, 100000]]})
+  const amplitude = randomLSystem().apply(5).split('').reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
+
+  const pitchSegment = key => {
+    const noteNumber = { A: 2, B: 3, C: 5, D: 7, E: 9, F: 12, G: 15, H: 24 }[key] || 7
+    return [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 249]]
+  }
+
+  // const pitch = lSystem('A', 9, {
+  //   A: () => 'AB',
+  //   B: () => 'BCD',
+  //   C: () => 'CA',
+  //   D: () => 'DE',
+  //   E: () => 'EFD'
+  // }).split('').reduce((acc, i) => acc.concat(pitchSegment(i)), [])
+  const pitch = randomLSystem(8).apply(5).split('').reduce((acc, i) => acc.concat(pitchSegment(i)), [])
+
+
+  const modIndexSegment = key => {
+    return {
+      A: [[35, 10], [1000, 25], [10, 5000]],
+      B: [[1, 250]],
+      C: [[500, 250]],
+      D: [[1.99, 250], [9.99, 500]],
+    }[key] || [[0, 0], [0, 500], [1, 1000]]
+  }
+
+  const modIndex = randomLSystem().apply(6).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
+  const harmonicity = randomLSystem().apply(5).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
+
+  play({amplitude, pitch, modIndex, harmonicity })
 }
