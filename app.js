@@ -37,10 +37,26 @@ function onLoad() {
   const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory(audioContext))
   const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory(audioContext))
   const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory(audioContext))
+  const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory(audioContext))
+  const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory(audioContext))
   connectFm1(audioContext.destination)
   connectFm2(audioContext.destination)
-  connectFm3(audioContext.destination)
+
+  const panR = audioContext.createStereoPanner()
+  panR.pan.setValueAtTime(-0.5, 0)
+  panR.connect(audioContext.destination)
+  connectFm3(panR)
+
+  const panL = audioContext.createStereoPanner()
+  panL.pan.setValueAtTime(0.5, 0)
+  panL.connect(audioContext.destination)
+  connectFm4(panL)
+
+  connectFm5(audioContext.destination)
+
   playWithLSystem(playFm3)
+  playWithLSystem(playFm4)
+  playBassWithLSystem(playFm5)
 
   let state = nextState()
   let clear;
@@ -50,7 +66,7 @@ function onLoad() {
       clearInterval(clear)
       clear = undefined
     } else {
-      clear = setInterval(startPlaying, 125)
+      clear = setInterval(startPlaying, 62.5)
     }
   }
 
@@ -75,10 +91,10 @@ function onLoad() {
 const midiNoteToF = note => 440.0 * Math.pow(2, (note - 69.0) / 12.0)
 
 const nextState = (state = initialState) => Object.assign({}, state, {
-  amplitude: [[0, 5], [1, 5], [0.3, 10], [0, 100]],
-  pitch: [[50, 1], [8000, 5], [80, 5], [50, 100]],
-  modIndex: scaleEnvelope(shiftEnvelope(randomEnvelope(3, 150), 1.5), 100),
-  harmonicity: scaleEnvelope(randomEnvelope(10, 150), 5)
+  amplitude: Math.random() > 0.75 ? [[0, 5], [1, 5], [0.73, 10], [0, 100]] : [[0, 0], [0, 150]],
+  pitch: [[50, 1], [8000, 1], [100, 5], [50, 100]],
+  modIndex: Math.random() > 0.5 ? 100 : [[10000, 10], [0, 50]],//scaleEnvelope(shiftEnvelope(randomEnvelope(3, 150), 1.5), 100),
+  harmonicity: Math.random() > 0.5 ? [[100, 1], [0, 10]] : 1000, //scaleEnvelope(randomEnvelope(10, 150), 5)
 })
 
 const randomInt = max => Math.floor(Math.random() * (max + 1))
@@ -152,8 +168,9 @@ const randomLSystem = (alphabetMaxSize = 4, ruleTransformationMaxSize = 3) => {
   const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].slice(0, alphabetSize)
   const randomChar = () => alphabet[Math.floor(Math.random() * alphabet.length)]
   const rules = alphabet.reduce((acc, char) => {
-    const mapping = [...new Array(ruleSize()).keys()].map(randomChar).join('')
-    return Object.assign(acc, { [char]: () => mapping })
+    const mappingA = [...new Array(ruleSize()).keys()].map(randomChar).join('')
+    const mappingB = [...new Array(ruleSize()).keys()].map(randomChar).join('')
+    return Object.assign(acc, { [char]: () => Math.random() > 0.5 ? mappingA : mappingB })
   }, {})
   return {
     axiom: alphabet[0],
@@ -169,7 +186,7 @@ const playWithLSystem = play => {
       B: [[1, 10], [0, 240]],
       C: [[1, 245], [0, 5]],
       D: [[0.5, 10], [0, 40], [0, 200]]
-    }[key] || [[0, 0], [0, 500]]
+    }[key] || (Math.random() > 0.5 ? [[0, 0], [0, 500]] : [[0, 0], [1, 500]])
   }
 
   // const amplitude = lSystem('A', 5, {
@@ -177,13 +194,17 @@ const playWithLSystem = play => {
   //   B: () => 'BBA'
   // }).split('').reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
 
-  const amplitude = randomLSystem(6).apply(5).split('').reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
+  const amplitude = randomLSystem(6).apply(5).split('')
+    .reduce((acc, i) => acc.concat(amplitudeSegment(i)), [])
+    .concat([[0, 10]])
 
   const pitchSegment = key => {
     const noteNumber = { A: 2, B: 3, C: 5, D: 7, E: 9, F: 12, G: 15, H: 24 }[key] || 7
-    return Math.random() > 0.5
+    return Math.random() > 0.7
       ? [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 124]]
-      : [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 249]]
+      : Math.random() > 0.5
+        ? [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 249]]
+        : [[midiNoteToF(noteNumber + 60), 1], [midiNoteToF(noteNumber + 60), 124]]
   }
 
   // const pitch = lSystem('A', 9, {
@@ -202,11 +223,25 @@ const playWithLSystem = play => {
       B: [[10, 250]],
       C: [[500, 250]],
       D: [[19.99, 250], [9.99, 500]],
-    }[key] || [[0, 0], [1, 500], [10, 1000]]
+    }[key] || [[20, 10], [2, 490], [10, 1000]]
   }
 
   const modIndex = randomLSystem(5).apply(6).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
   const harmonicity = randomLSystem(5).apply(5).split('').reduce((acc, i) => acc.concat(modIndexSegment(i)), [])
 
   play({amplitude, pitch, modIndex, harmonicity })
+}
+
+const playBassWithLSystem = play => {
+  const amplitude = [...new Array(100).keys()].reduce((acc, it) => acc.concat(
+    [[0.7, 10], [0.55, 240], [0, 1750]]
+  ),[])
+
+  const pitchSegment = key => {
+    const noteNumber = { A: 2, B: 3, C: 5, D: 7, E: 9, F: 12, G: 15, H: 24 }[key] || 7
+    return [[midiNoteToF(noteNumber + 24), 1], [midiNoteToF(noteNumber + 24), 1999]]
+  }
+  const pitch = randomLSystem(4).apply(5).split('').reduce((acc, i) => acc.concat(pitchSegment(i)), [])
+
+  play({amplitude, pitch, modIndex: 5, harmonicity: 1})
 }
