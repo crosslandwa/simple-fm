@@ -1,4 +1,12 @@
-window.addEventListener('load', onLoad)
+export function appMiddleware (store) {
+  return (next) => (action) => {
+    switch (action.type) {
+      case 'START_PLAYING':
+        onLoad()
+    }
+    return next(action)
+  }
+}
 
 function fmSynth(operatorFactory) {
   const { audioParam, multiply, oscillator, nowMs } = operatorFactory
