@@ -1,3 +1,5 @@
+import operatorFactory from './operator-factory'
+
 export function appMiddleware (store) {
   return (next) => (action) => {
     switch (action.type) {
@@ -129,32 +131,6 @@ const initialState = {
   harmonicity: 4.99
 }
 
-const operatorFactory = audioContext => ({
-  oscillator: (frequencyModulators) => {
-    const osc = audioContext.createOscillator()
-    osc.frequency.setValueAtTime(0, 0)
-    frequencyModulators.forEach(frequency => frequency.connect(osc.frequency))
-    osc.start()
-    return osc
-  },
-  audioParam: (initialValue) => {
-    const node = audioContext.createGain()
-    const source = audioContext.createConstantSource()
-    source.start()
-    node.gain.setValueAtTime(initialValue, 0)
-    source.connect(node)
-    return node
-  },
-  multiply: (a, b) => {
-    const node = audioContext.createGain()
-    node.gain.setValueAtTime(0, 0)
-    a.connect(node)
-    b.connect(node.gain)
-    return node
-  },
-  nowMs: () => audioContext.currentTime * 1000
-})
-
 const applyEnvelope = (param, atTimeMs, ...envelopePoints) => {
   let totalTime = atTimeMs / 1000
   envelopePoints.forEach(([level, time]) => {
@@ -163,7 +139,6 @@ const applyEnvelope = (param, atTimeMs, ...envelopePoints) => {
     param.linearRampToValueAtTime(level, totalTime)
   })
 }
-
 
 /** L SYSTEM stuff **/
 
