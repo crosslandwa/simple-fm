@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { startPlaying } from './actions'
+import QwertyFM from './QwertyFM'
 
 const mapStateToProps = state => ({})
 const mapDispatchToProps = dispatch => ({
@@ -13,6 +14,7 @@ const App = props => (
     fontFamily: 'sans-serif',
     fontSize: '90%'
   }}>
+    <QwertyFM />
     <button onClick={props.start}>Click to start</button>
   </div>
 )

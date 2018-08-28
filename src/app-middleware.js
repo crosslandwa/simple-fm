@@ -1,5 +1,6 @@
 import OperatorFactory from './operator-factory'
 import fmSynth from './fm-synth'
+import midiNoteToF from './midi-note-to-f'
 
 export function appMiddleware (store) {
   return (next) => (action) => {
@@ -11,17 +12,14 @@ export function appMiddleware (store) {
   }
 }
 
-
 function onLoad() {
   const audioContext = new(window.AudioContext || window.webkitAudioContext)
   const operatorFactory = OperatorFactory(audioContext)
   const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory)
-  const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory)
   const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory)
   const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory)
   const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory)
   connectFm1(audioContext.destination)
-  connectFm2(audioContext.destination)
 
   const panR = audioContext.createStereoPanner()
   panR.pan.setValueAtTime(0.75, 0)
@@ -54,22 +52,9 @@ function onLoad() {
   window.addEventListener('keypress', ({ key }) => {
     if (' ' === key) {
       togglePlaying()
-      return
-    }
-    const noteNumber = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j:11, k: 12 }[key]
-    if (noteNumber >= 0) {
-      const frequency = midiNoteToF(noteNumber + 48)
-      playFm2({
-        amplitude: [[0, 10], [0.9, 10], [0, 500]],
-        pitch: [[frequency, 0], [0.5 * frequency, 50]],
-        modIndex: [[0, 10], [1, 50],[0.5, 100], [0.1, 500]],
-        harmonicity: 4.99
-      })
     }
   })
 }
-
-const midiNoteToF = note => 440.0 * Math.pow(2, (note - 69.0) / 12.0)
 
 const nextState = (state = initialState) => Object.assign({}, state, {
   amplitude: Math.random() > 0.75 ? [[0, 5], [1, 5], [0.73, 10], [0, 100]] : [[0, 0], [0, 150]],
