@@ -6,7 +6,7 @@ const operatorFactory = audioContext => ({
     osc.start()
     return osc
   },
-  audioParam: (initialValue) => {
+  audioParam: (initialValue = 0) => {
     const node = audioContext.createGain()
     const source = audioContext.createConstantSource()
     source.start()

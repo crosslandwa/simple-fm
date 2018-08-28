@@ -1,4 +1,5 @@
-import operatorFactory from './operator-factory'
+import OperatorFactory from './operator-factory'
+import fmSynth from './fm-synth'
 
 export function appMiddleware (store) {
   return (next) => (action) => {
@@ -10,55 +11,25 @@ export function appMiddleware (store) {
   }
 }
 
-function fmSynth(operatorFactory) {
-  const { audioParam, multiply, oscillator, nowMs } = operatorFactory
-
-  const carrierAmplitude = audioParam(0)
-  const carrierFrequency = audioParam(0)
-  const harmonicityRatio = audioParam(0)
-  const modulationIndex = audioParam(0)
-
-  const carrierFrequencyTimesHarmonicityRatio = multiply(carrierFrequency, harmonicityRatio)
-  const modulator = multiply(
-    oscillator([carrierFrequencyTimesHarmonicityRatio]),
-    multiply(carrierFrequencyTimesHarmonicityRatio, modulationIndex)
-  )
-  const carrier = oscillator([carrierFrequency, modulator])
-  const output = multiply(carrier, carrierAmplitude)
-
-  const playNote = ({ amplitude, pitch, modIndex, harmonicity }) => {
-    [carrierFrequency.gain, carrierAmplitude.gain, modulationIndex.gain, harmonicityRatio.gain]
-      .forEach(param => param.cancelAndHoldAtTime(0))
-
-    const coerceToEnvelope = x => x.length ? x : [[x, 0]]
-    const atTimeMs = nowMs()
-
-    pitch && applyEnvelope(carrierFrequency.gain, atTimeMs, ...coerceToEnvelope(pitch))
-    amplitude && applyEnvelope(carrierAmplitude.gain, atTimeMs, ...coerceToEnvelope(amplitude))
-    modIndex && applyEnvelope(modulationIndex.gain, atTimeMs, ...coerceToEnvelope(modIndex))
-    harmonicity && applyEnvelope(harmonicityRatio.gain, atTimeMs, ...coerceToEnvelope(harmonicity))
-  }
-
-  return { playNote, connect: destination => output.connect(destination) }
-}
 
 function onLoad() {
-  const audioContext = new(window.AudioContext || window.webkitAudioContext);
-  const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory(audioContext))
-  const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory(audioContext))
-  const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory(audioContext))
-  const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory(audioContext))
-  const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory(audioContext))
+  const audioContext = new(window.AudioContext || window.webkitAudioContext)
+  const operatorFactory = OperatorFactory(audioContext)
+  const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory)
+  const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory)
+  const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory)
+  const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory)
+  const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory)
   connectFm1(audioContext.destination)
   connectFm2(audioContext.destination)
 
   const panR = audioContext.createStereoPanner()
-  panR.pan.setValueAtTime(-0.5, 0)
+  panR.pan.setValueAtTime(0.75, 0)
   panR.connect(audioContext.destination)
   connectFm3(panR)
 
   const panL = audioContext.createStereoPanner()
-  panL.pan.setValueAtTime(0.5, 0)
+  panL.pan.setValueAtTime(-0.75, 0)
   panL.connect(audioContext.destination)
   connectFm4(panL)
 
@@ -129,15 +100,6 @@ const initialState = {
   pitch: [[440, 0], [0.5 * 440, 50]],
   modIndex: [[0, 10], [1, 50],[0.5, 100], [0.1, 500]],
   harmonicity: 4.99
-}
-
-const applyEnvelope = (param, atTimeMs, ...envelopePoints) => {
-  let totalTime = atTimeMs / 1000
-  envelopePoints.forEach(([level, time]) => {
-    totalTime += (time / 1000)
-    // param.exponentialRampToValueAtTime(level, totalTime) // THIS WON'T WORK WHEN THE CURRENT VALUE OR TARGET VALUE IS ZERO!
-    param.linearRampToValueAtTime(level, totalTime)
-  })
 }
 
 /** L SYSTEM stuff **/
