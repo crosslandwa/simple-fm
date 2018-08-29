@@ -1,5 +1,7 @@
-import { updateAmplitude } from '../interactions'
-import { amplitudeSelector, amplitudeEnvelopeSelector } from '../interactions'
+import { updateAmplitude, updateHarmonicity, updateModIndex } from '../interactions'
+import { amplitudeSelector, amplitudeEnvelopeSelector} from '../interactions'
+import { modIndexSelector, modIndexEnvelopeSelector } from '../interactions'
+import { harmonicitySelector, harmonicityEnvelopeSelector } from '../interactions'
 import createStore from '../../store'
 
 describe('QWERTY FM', () => {
@@ -11,5 +13,15 @@ describe('QWERTY FM', () => {
     dispatch(updateAmplitude('1 200 0 100'))
     expect(amplitudeSelector(state())).toEqual('1 200 0 100')
     expect(amplitudeEnvelopeSelector(state())).toEqual([[1, 200], [0, 100]])
+  })
+
+  it('allows harmonicity and modulation index to be specified as a list and expressed as an envelope', () => {
+    dispatch(updateHarmonicity('150 250 10 1000'))
+    expect(harmonicitySelector(state())).toEqual('150 250 10 1000')
+    expect(harmonicityEnvelopeSelector(state())).toEqual([[150, 250], [10, 1000]])
+
+    dispatch(updateModIndex('100 200 10 1000'))
+    expect(modIndexSelector(state())).toEqual('100 200 10 1000')
+    expect(modIndexEnvelopeSelector(state())).toEqual([[100, 200], [10, 1000]])
   })
 })

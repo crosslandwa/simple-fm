@@ -1,13 +1,15 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { playNote, updateAmplitude } from './interactions'
-import { amplitudeSelector } from './interactions'
+import { playNote, updateAmplitude, updateHarmonicity, updateModIndex } from './interactions'
+import { amplitudeSelector, harmonicitySelector, modIndexSelector } from './interactions'
 
 const mapStateToProps = state => ({
   amplitude: amplitudeSelector(state),
+  harmonicity: harmonicitySelector(state),
+  modIndex: modIndexSelector(state),
   octave: 4
 })
-const mapDispatchToProps = { playNote, updateAmplitude }
+const mapDispatchToProps = { playNote, updateAmplitude, updateHarmonicity, updateModIndex }
 
 const white = {
   backgroundColor: '#EEEEEE',
@@ -49,8 +51,8 @@ const QwertyFM = props => (
     }} >
       <Input label="Amplitude" value={props.amplitude} onInput={props.updateAmplitude}/>
       <Input label="Pitch" />
-      <Input label="Mod Index" />
-      <Input label="Harmonicity" />
+      <Input label="Mod Index" value={props.modIndex} onInput={props.updateModIndex}/>
+      <Input label="Harmonicity" value={props.harmonicity} onInput={props.updateHarmonicity}/>
     </div>
   </div>
 )
