@@ -1,5 +1,6 @@
-const rootReducer = (state = {}, action) => {
-  return state
-}
+import { combineReducers } from 'redux'
+import { reducer as qwertyFMReducer } from './qwertyFM/interactions'
 
-export default rootReducer
+export default combineReducers({
+  qwertyFMReducer
+})
