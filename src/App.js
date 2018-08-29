@@ -5,14 +5,12 @@ import QwertyFM from './QwertyFM'
 
 const mapStateToProps = state => ({})
 const mapDispatchToProps = dispatch => ({
-  start: () => dispatch(startPlaying()),
+  start: () => dispatch(startPlaying())
 })
 
 const App = props => (
   <div style={{
-    width: '90vw',
-    fontFamily: 'sans-serif',
-    fontSize: '90%'
+    fontFamily: 'sans-serif'
   }}>
     <QwertyFM />
     <button onClick={props.start}>Click to start</button>
