@@ -59,8 +59,8 @@ function onLoad() {
 const nextState = (state = initialState) => Object.assign({}, state, {
   amplitude: Math.random() > 0.75 ? [[0, 5], [1, 5], [0.73, 10], [0, 100]] : [[0, 0], [0, 150]],
   pitch: [[50, 1], [8000, 1], [100, 5], [50, 100]],
-  modIndex: Math.random() > 0.5 ? 100 : [[10000, 10], [0, 50]],//scaleEnvelope(shiftEnvelope(randomEnvelope(3, 150), 1.5), 100),
-  harmonicity: Math.random() > 0.5 ? [[100, 1], [0, 10]] : 1000, //scaleEnvelope(randomEnvelope(10, 150), 5)
+  modIndex: Math.random() > 0.5 ? 100 : [[10000, 10], [0, 50]],
+  harmonicity: Math.random() > 0.5 ? [[100, 1], [0, 10]] : 1000,
 })
 
 const randomInt = max => Math.floor(Math.random() * (max + 1))
@@ -76,7 +76,7 @@ const randomNormalisedEnvelope = steps => {
   })
 }
 
-const scaleEnvelope = (env, scaleFactor) => env.map(([a, b]) => [a * scaleFactor, b])
+
 const shiftEnvelope = (env, shiftAmount) => env.map(([a, b]) => [a + shiftAmount, b])
 const stretchEnvelope = (env, stretchFactor) => env.map(([a, b]) => [a, b * stretchFactor])
 
