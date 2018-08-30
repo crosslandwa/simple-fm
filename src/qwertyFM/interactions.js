@@ -10,6 +10,7 @@ export const updateAmplitude = valueList => ({ type: 'QWERTY_FM_UPDATE_AMPLITUDE
 export const updateModIndex = valueList => ({ type: 'QWERTY_FM_UPDATE_MOD_INDEX', valueList })
 export const updateHarmonicity = valueList => ({ type: 'QWERTY_FM_UPDATE_HARMONICITY', valueList })
 export const updatePitch = valueList => ({ type: 'QWERTY_FM_UPDATE_PITCH', valueList })
+export const updateFixedPitch = fixedPitch => ({ type: 'QWERTY_FM_UPDATE_FIXED_PITCH', fixedPitch   })
 
 /* SELECTORS */
 export const amplitudeSelector = state => state.qwertyFMReducer.amplitude
@@ -20,12 +21,14 @@ export const harmonicitySelector = state => state.qwertyFMReducer.harmonicity
 export const harmonicityEnvelopeSelector = state => toEnvelope(harmonicitySelector(state))
 export const pitchSelector = state => state.qwertyFMReducer.pitch
 export const pitchEnvelopeSelector = state => toEnvelope(pitchSelector(state))
+export const fixedPitchSelector = state => state.qwertyFMReducer.fixedPitch
 
 /* REDUCER */
 const initialState = {
   amplitude: '0.9 20 0 500',
   harmonicity: '4.99 5 4.99 300 1 100',
   modIndex: '0 10 200 20 5 100 0.1 500',
+  fixedPitch: false,
   pitch: ''
 }
 
@@ -39,6 +42,8 @@ export const reducer = (state = initialState, action) => {
       return {...state, modIndex: action.valueList}
     case 'QWERTY_FM_UPDATE_PITCH':
       return {...state, pitch: action.valueList}
+    case 'QWERTY_FM_UPDATE_FIXED_PITCH':
+      return {...state, fixedPitch: action.fixedPitch}
   }
   return state
 }

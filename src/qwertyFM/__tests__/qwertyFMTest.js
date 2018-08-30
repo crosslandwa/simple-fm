@@ -3,6 +3,7 @@ import { amplitudeSelector, amplitudeEnvelopeSelector } from '../interactions'
 import { modIndexSelector, modIndexEnvelopeSelector } from '../interactions'
 import { harmonicitySelector, harmonicityEnvelopeSelector } from '../interactions'
 import { updatePitch, pitchSelector, pitchEnvelopeSelector } from '../interactions'
+import { updateFixedPitch, fixedPitchSelector } from '../interactions'
 import createStore from '../../store'
 
 describe('QWERTY FM', () => {
@@ -30,6 +31,11 @@ describe('QWERTY FM', () => {
     dispatch(updatePitch('1 0 10 100'))
     expect(pitchSelector(state())).toEqual('1 0 10 100')
     expect(pitchEnvelopeSelector(state())).toEqual([[1, 0], [10, 100]])
+
+    dispatch(updateFixedPitch(true))
+    expect(fixedPitchSelector(state())).toEqual(true)
+    dispatch(updateFixedPitch(false))
+    expect(fixedPitchSelector(state())).toEqual(false)
   })
 
   it('allows envelopes to not be provided', () => {

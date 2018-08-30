@@ -3,15 +3,24 @@ import { connect } from 'react-redux'
 import { playNote, updateAmplitude, updateHarmonicity, updateModIndex } from './interactions'
 import { amplitudeSelector, harmonicitySelector, modIndexSelector } from './interactions'
 import { updatePitch, pitchSelector } from './interactions'
+import { updateFixedPitch, fixedPitchSelector } from './interactions'
 
 const mapStateToProps = state => ({
   amplitude: amplitudeSelector(state),
   harmonicity: harmonicitySelector(state),
   modIndex: modIndexSelector(state),
   octave: 4,
-  pitch: pitchSelector(state)
+  pitch: pitchSelector(state),
+  fixedPitch: fixedPitchSelector(state)
 })
-const mapDispatchToProps = { playNote, updateAmplitude, updateHarmonicity, updateModIndex, updatePitch }
+const mapDispatchToProps = {
+  playNote,
+  updateAmplitude,
+  updateHarmonicity,
+  updateModIndex,
+  updatePitch,
+  updateFixedPitch
+}
 
 const white = {
   backgroundColor: '#EEEEEE',
@@ -51,10 +60,11 @@ const QwertyFM = props => (
       display: 'flex',
       flexDirection: 'column'
     }} >
-      <Input label="Amplitude" value={props.amplitude} onInput={props.updateAmplitude}/>
-      <Input label="Pitch" value={props.pitch} onInput={props.updatePitch}/>
-      <Input label="Mod Index" value={props.modIndex} onInput={props.updateModIndex}/>
-      <Input label="Harmonicity" value={props.harmonicity} onInput={props.updateHarmonicity}/>
+      <Input label="Amplitude" value={props.amplitude} onChange={e => props.updateAmplitude(e.target.value)}/>
+      <Input label="Pitch" value={props.pitch} onChange={e => props.updatePitch(e.target.value)}/>
+      <Input label="Fixed Pitch" checked={props.fixedPitch} onChange={e => props.updateFixedPitch(e.target.checked)} type="checkbox"/>
+      <Input label="Mod Index" value={props.modIndex} onChange={e => props.updateModIndex(e.target.value)}/>
+      <Input label="Harmonicity" value={props.harmonicity} onChange={e => props.updateHarmonicity(e.target.value)}/>
     </div>
   </div>
 )
@@ -65,7 +75,13 @@ const Input = props => (
     width: '100%'
   }} >
     <span style={{ minWidth: '5.5em' }}>{props.label}</span>
-    <input style={{ flexGrow: 1, marginLeft: '1em' }} type="text" value={props.value} onInput={e => props.onInput(e.target.value)} />
+    <input
+      style={{ flexGrow: 1, marginLeft: '1em' }}
+      type={props.type || 'text'}
+      value={props.value}
+      checked={props.checked}
+      onChange={props.onChange}
+    />
   </label>
 )
 

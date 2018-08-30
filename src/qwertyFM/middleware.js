@@ -1,7 +1,7 @@
 import fmSynth from '../fm-synth'
 import midiNoteToF from '../midi-note-to-f'
 import OperatorFactory from '../operator-factory'
-import { amplitudeEnvelopeSelector, harmonicityEnvelopeSelector, modIndexEnvelopeSelector, pitchEnvelopeSelector } from './interactions'
+import { amplitudeEnvelopeSelector, harmonicityEnvelopeSelector, modIndexEnvelopeSelector, pitchEnvelopeSelector, fixedPitchSelector } from './interactions'
 
 const createSynth = () => {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)()
@@ -25,7 +25,12 @@ export const qwertyFMMiddleware = (store) => (next) => (action) => {
       const frequency = midiNoteToF(action.noteNumber)
       playNote({
         amplitude: amplitudeEnvelopeSelector(store.getState()),
-        pitch: apply(env => env ? scaleEnvelope(env, frequency) : frequency, pitchEnvelopeSelector(store.getState())),
+        pitch: fixedPitchSelector(store.getState())
+          ? pitchEnvelopeSelector(store.getState())
+          : apply(
+            env => env ? scaleEnvelope(env, frequency) : frequency,
+            pitchEnvelopeSelector(store.getState())
+          ),
         modIndex: modIndexEnvelopeSelector(store.getState()),
         harmonicity: harmonicityEnvelopeSelector(store.getState())
       })
