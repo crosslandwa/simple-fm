@@ -2,6 +2,7 @@ import { updateAmplitude, updateHarmonicity, updateModIndex } from '../interacti
 import { amplitudeSelector, amplitudeEnvelopeSelector} from '../interactions'
 import { modIndexSelector, modIndexEnvelopeSelector } from '../interactions'
 import { harmonicitySelector, harmonicityEnvelopeSelector } from '../interactions'
+import { updatePitch , pitchSelector, pitchEnvelopeSelector} from '../interactions'
 import createStore from '../../store'
 
 describe('QWERTY FM', () => {
@@ -25,6 +26,12 @@ describe('QWERTY FM', () => {
     expect(modIndexEnvelopeSelector(state())).toEqual([[100, 200], [10, 1000]])
   })
 
+  it('allows pitch envelope to be fixed or scale the incoming note', () => {
+    dispatch(updatePitch('1 0 10 100'))
+    expect(pitchSelector(state())).toEqual('1 0 10 100')
+    expect(pitchEnvelopeSelector(state())).toEqual([[1, 0], [10, 100]])
+  })
+
   it('allows envelopes to not be provided', () => {
     dispatch(updateAmplitude(' '))
     expect(amplitudeEnvelopeSelector(state())).toEqual(undefined)
@@ -34,6 +41,9 @@ describe('QWERTY FM', () => {
 
     dispatch(updateModIndex(''))
     expect(modIndexEnvelopeSelector(state())).toEqual(undefined)
+
+    dispatch(updatePitch(''))
+    expect(pitchEnvelopeSelector(state())).toEqual(undefined)
   })
 
   it('treats an envelope with a single value as a constant', () => {
@@ -45,5 +55,8 @@ describe('QWERTY FM', () => {
 
     dispatch(updateModIndex('3'))
     expect(modIndexEnvelopeSelector(state())).toEqual([[3, 0]])
+
+    dispatch(updatePitch('4'))
+    expect(pitchEnvelopeSelector(state())).toEqual([[4, 0]])
   })
 })
