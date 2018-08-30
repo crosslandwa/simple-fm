@@ -24,4 +24,15 @@ describe('QWERTY FM', () => {
     expect(modIndexSelector(state())).toEqual('100 200 10 1000')
     expect(modIndexEnvelopeSelector(state())).toEqual([[100, 200], [10, 1000]])
   })
+
+  it('allows envelopes to not be provided', () => {
+    dispatch(updateAmplitude(' '))
+    expect(amplitudeEnvelopeSelector(state())).toEqual(undefined)
+    
+    dispatch(updateHarmonicity(''))
+    expect(harmonicityEnvelopeSelector(state())).toEqual(undefined)
+
+    dispatch(updateModIndex(''))
+    expect(modIndexEnvelopeSelector(state())).toEqual(undefined)
+  })
 })

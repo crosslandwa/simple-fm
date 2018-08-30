@@ -1,6 +1,8 @@
 /* UTILITY */
 const chunk = (x, size = 2) => x.reduce(([l, r]) => [l.concat([r.slice(0, size)]), r.slice(size)], [[], x])[0].filter(a => a.length)
-const toEnvelope = raw => chunk(raw.split(/\s+/).map(Number))
+const toEnvelope = raw => raw.trim()
+  ? chunk(raw.split(/\s+/).map(Number))
+  : undefined
 
 
 /* ACTIONS */
