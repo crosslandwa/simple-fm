@@ -4,14 +4,12 @@ const toEnvelope = raw => raw.trim()
   ? chunk(raw.split(/\s+/).map(Number), 2).map(([value, time = 0]) => [value, time])
   : undefined
 
-
 /* ACTIONS */
-export const playNote = noteNumber => ({ type: 'QWERTY_FM_PLAY_NOTE', noteNumber})
-export const updateAmplitude = valueList => ({ type: 'QWERTY_FM_UPDATE_AMPLITUDE', valueList})
-export const updateModIndex = valueList => ({ type: 'QWERTY_FM_UPDATE_MOD_INDEX', valueList})
-export const updateHarmonicity = valueList => ({ type: 'QWERTY_FM_UPDATE_HARMONICITY', valueList})
-export const updatePitch = valueList => ({ type: 'QWERTY_FM_UPDATE_PITCH', valueList})
-
+export const playNote = noteNumber => ({ type: 'QWERTY_FM_PLAY_NOTE', noteNumber })
+export const updateAmplitude = valueList => ({ type: 'QWERTY_FM_UPDATE_AMPLITUDE', valueList })
+export const updateModIndex = valueList => ({ type: 'QWERTY_FM_UPDATE_MOD_INDEX', valueList })
+export const updateHarmonicity = valueList => ({ type: 'QWERTY_FM_UPDATE_HARMONICITY', valueList })
+export const updatePitch = valueList => ({ type: 'QWERTY_FM_UPDATE_PITCH', valueList })
 
 /* SELECTORS */
 export const amplitudeSelector = state => state.qwertyFMReducer.amplitude
@@ -31,7 +29,7 @@ const initialState = {
   pitch: ''
 }
 
-export const reducer = (state = initialState, action)  => {
+export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'QWERTY_FM_UPDATE_AMPLITUDE':
       return {...state, amplitude: action.valueList}

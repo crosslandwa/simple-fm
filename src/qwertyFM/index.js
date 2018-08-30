@@ -16,7 +16,7 @@ const mapDispatchToProps = { playNote, updateAmplitude, updateHarmonicity, updat
 const white = {
   backgroundColor: '#EEEEEE',
   border: '1px solid #000000',
-  width: '1.5em',
+  width: '1.5em'
 }
 const black = {
   backgroundColor: '#111111',
@@ -38,14 +38,14 @@ const QwertyFM = props => (
     <div style={{
       border: '1px solid #000000',
       display: 'flex',
-      height: '10em',
+      height: '10em'
     }}>
       {[...new Array(37).keys()].map(number => number + props.octave * 12).map((noteNumber, index) => (
         <div
           style={blackKeys.includes(index % 12) ? black : white}
           onClick={() => props.playNote(noteNumber)}
-          ></div>
-        ))}
+        ></div>
+      ))}
     </div>
     <div style={{
       display: 'flex',

@@ -4,7 +4,7 @@ import OperatorFactory from '../operator-factory'
 import { amplitudeEnvelopeSelector, harmonicityEnvelopeSelector, modIndexEnvelopeSelector } from './interactions'
 
 const createSynth = () => {
-  const audioContext = new(window.AudioContext || window.webkitAudioContext)
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)()
   const operatorFactory = OperatorFactory(audioContext)
   const { playNote, connect } = fmSynth(operatorFactory)
   connect(audioContext.destination)

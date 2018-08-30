@@ -1,8 +1,8 @@
 import { updateAmplitude, updateHarmonicity, updateModIndex } from '../interactions'
-import { amplitudeSelector, amplitudeEnvelopeSelector} from '../interactions'
+import { amplitudeSelector, amplitudeEnvelopeSelector } from '../interactions'
 import { modIndexSelector, modIndexEnvelopeSelector } from '../interactions'
 import { harmonicitySelector, harmonicityEnvelopeSelector } from '../interactions'
-import { updatePitch , pitchSelector, pitchEnvelopeSelector} from '../interactions'
+import { updatePitch, pitchSelector, pitchEnvelopeSelector } from '../interactions'
 import createStore from '../../store'
 
 describe('QWERTY FM', () => {

@@ -13,7 +13,7 @@ export default {
   },
   plugins: [
     replace({
-      'process.env.NODE_ENV': JSON.stringify( 'production' )
+      'process.env.NODE_ENV': JSON.stringify('production')
     }),
     babel({
       exclude: 'node_modules/**',
@@ -27,7 +27,7 @@ export default {
       }
     }),
     postcss({
-      extensions: [ '.css' ],
+      extensions: [ '.css' ]
     })
-  ],
-};
+  ]
+}

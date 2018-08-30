@@ -1,4 +1,4 @@
-function fmSynth(operatorFactory) {
+function fmSynth (operatorFactory) {
   const { audioParam, multiply, oscillator, nowMs } = operatorFactory
 
   const carrierAmplitude = audioParam(0)
