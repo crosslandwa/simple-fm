@@ -28,11 +28,22 @@ describe('QWERTY FM', () => {
   it('allows envelopes to not be provided', () => {
     dispatch(updateAmplitude(' '))
     expect(amplitudeEnvelopeSelector(state())).toEqual(undefined)
-    
+
     dispatch(updateHarmonicity(''))
     expect(harmonicityEnvelopeSelector(state())).toEqual(undefined)
 
     dispatch(updateModIndex(''))
     expect(modIndexEnvelopeSelector(state())).toEqual(undefined)
+  })
+
+  it('treats an envelope with a single value as a constant', () => {
+    dispatch(updateAmplitude('1'))
+    expect(amplitudeEnvelopeSelector(state())).toEqual([[1, 0]])
+
+    dispatch(updateHarmonicity('2'))
+    expect(harmonicityEnvelopeSelector(state())).toEqual([[2, 0]])
+
+    dispatch(updateModIndex('3'))
+    expect(modIndexEnvelopeSelector(state())).toEqual([[3, 0]])
   })
 })
