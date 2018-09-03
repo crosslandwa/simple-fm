@@ -1,9 +1,13 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { playNote, updateAmplitude, updateHarmonicity, updateModIndex } from './interactions'
-import { amplitudeSelector, harmonicitySelector, modIndexSelector } from './interactions'
-import { updatePitch, pitchSelector } from './interactions'
-import { updateFixedPitch, fixedPitchSelector } from './interactions'
+import {
+  playNote,
+  updateAmplitude, amplitudeSelector,
+  updateHarmonicity, harmonicitySelector,
+  updateModIndex, modIndexSelector,
+  updatePitch, pitchSelector,
+  updateFixedPitch, fixedPitchSelector
+} from './interactions'
 
 const mapStateToProps = state => ({
   amplitude: amplitudeSelector(state),
