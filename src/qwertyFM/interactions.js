@@ -10,7 +10,7 @@ export const updateAmplitude = valueList => ({ type: 'QWERTY_FM_UPDATE_AMPLITUDE
 export const updateModIndex = valueList => ({ type: 'QWERTY_FM_UPDATE_MOD_INDEX', valueList })
 export const updateHarmonicity = valueList => ({ type: 'QWERTY_FM_UPDATE_HARMONICITY', valueList })
 export const updatePitch = valueList => ({ type: 'QWERTY_FM_UPDATE_PITCH', valueList })
-export const updateFixedPitch = fixedPitch => ({ type: 'QWERTY_FM_UPDATE_FIXED_PITCH', fixedPitch   })
+export const updateFixedPitch = fixedPitch => ({ type: 'QWERTY_FM_UPDATE_FIXED_PITCH', fixedPitch })
 
 /* SELECTORS */
 export const amplitudeSelector = state => state.qwertyFMReducer.amplitude
