@@ -1,8 +1,14 @@
-import OperatorFactory from './operator-factory'
-import fmSynth from './fm-synth'
-import midiNoteToF from './midi-note-to-f'
+import OperatorFactory from '../operator-factory'
+import fmSynth from '../fm-synth'
+import midiNoteToF from '../midi-note-to-f'
 
-export function appMiddleware (store) {
+/* ACTIONS */
+
+export const startPlaying = () => ({ type: 'START_PLAYING' })
+
+/* MIDDLEWARE */
+
+export function middleware (store) {
   return (next) => (action) => {
     switch (action.type) {
       case 'START_PLAYING':

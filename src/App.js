@@ -1,20 +1,14 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { startPlaying } from './actions'
-import QwertyFM from './QwertyFM'
-
-const mapStateToProps = state => ({})
-const mapDispatchToProps = dispatch => ({
-  start: () => dispatch(startPlaying())
-})
+import QwertyFM from './qwertyFM'
+import Melody from './melody'
 
 const App = props => (
   <div style={{
     fontFamily: 'sans-serif'
   }}>
     <QwertyFM />
-    <button onClick={props.start}>Click to start</button>
+    <Melody />
   </div>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default App
