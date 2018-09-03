@@ -1,6 +1,7 @@
 import OperatorFactory from '../operator-factory'
 import fmSynth from '../fm-synth'
 import midiNoteToF from '../midi-note-to-f'
+import { lSystem } from '../lSystem'
 
 /* ACTIONS */
 
@@ -43,9 +44,6 @@ function onLoad () {
 }
 
 /** L SYSTEM stuff **/
-
-const lSystem = (axiom, iterations, rules) => [...Array(iterations).keys()]
-  .reduce(acc => acc.split('').map(c => rules[c] ? rules[c]() : c).join(''), axiom)
 
 const randomLSystem = (alphabetMaxSize = 4, ruleTransformationMaxSize = 3) => {
   const alphabetSize = Math.floor(Math.random() * alphabetMaxSize) + 2
