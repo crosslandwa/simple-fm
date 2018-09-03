@@ -2,45 +2,61 @@ import OperatorFactory from '../operator-factory'
 import fmSynth from '../fm-synth'
 import midiNoteToF from '../midi-note-to-f'
 import { lSystem } from '../lSystem'
+import { ifAudioContext } from '../audio-context'
 
 /* ACTIONS */
 
 export const startPlaying = () => ({ type: 'START_PLAYING' })
+export const pausePlaying = () => ({ type: 'PAUSE_PLAYING' })
+export const stopPlaying = () => ({ type: 'STOP_PLAYING' })
 
 /* MIDDLEWARE */
+
+const { playFm1, playFm2, playFm3 } = ifAudioContext(
+  audioContext => {
+    const operatorFactory = OperatorFactory(audioContext)
+    const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory)
+    const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory)
+    const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory)
+
+    const panR = audioContext.createStereoPanner()
+    panR.pan.setValueAtTime(0.75, 0)
+    panR.connect(audioContext.destination)
+    connectFm1(panR)
+
+    const panL = audioContext.createStereoPanner()
+    panL.pan.setValueAtTime(-0.75, 0)
+    panL.connect(audioContext.destination)
+    connectFm2(panL)
+
+    connectFm3(audioContext.destination)
+    return { playFm1, playFm2, playFm3 }
+  },
+  { playFm1: () => {}, playFm2: () => {}, playFm3: () => {} }
+)
 
 export function middleware (store) {
   return (next) => (action) => {
     switch (action.type) {
       case 'START_PLAYING':
-        onLoad()
+        playWithLSystem(playFm1)
+        playWithLSystem(playFm2)
+        playBassWithLSystem(playFm3)
+        return
+      case 'PAUSE_PLAYING':
+        playFm1()
+        playFm2()
+        playFm3()
+        return
+      case 'STOP_PLAYING':
+        const stop = { amplitude: 0.001 } // TODO handle edge case (in FM synth) where single value of zero passed
+        playFm1(stop)
+        playFm2(stop)
+        playFm3(stop)
+        return
     }
     return next(action)
   }
-}
-
-function onLoad () {
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-  const operatorFactory = OperatorFactory(audioContext)
-  const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory)
-  const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory)
-  const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory)
-
-  const panR = audioContext.createStereoPanner()
-  panR.pan.setValueAtTime(0.75, 0)
-  panR.connect(audioContext.destination)
-  connectFm3(panR)
-
-  const panL = audioContext.createStereoPanner()
-  panL.pan.setValueAtTime(-0.75, 0)
-  panL.connect(audioContext.destination)
-  connectFm4(panL)
-
-  connectFm5(audioContext.destination)
-
-  playWithLSystem(playFm3)
-  playWithLSystem(playFm4)
-  playBassWithLSystem(playFm5)
 }
 
 /** L SYSTEM stuff **/

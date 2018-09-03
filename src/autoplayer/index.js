@@ -1,15 +1,15 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { startPlaying } from './interactions'
+import { pausePlaying, startPlaying, stopPlaying } from './interactions'
 
 const mapStateToProps = state => ({})
-const mapDispatchToProps = dispatch => ({
-  start: () => dispatch(startPlaying())
-})
+const mapDispatchToProps = { pausePlaying, startPlaying, stopPlaying }
 
 const App = props => (
   <div>
-    <button onClick={props.start}>Click to start</button>
+    <button onClick={props.startPlaying}>Click to start</button>
+    <button onClick={props.pausePlaying}>Click to pause</button>
+    <button onClick={props.stopPlaying}>Click to stop</button>
   </div>
 )
 

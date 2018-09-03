@@ -14,7 +14,7 @@ function fmSynth (operatorFactory) {
   const carrier = oscillator([carrierFrequency, modulator])
   const output = multiply(carrier, carrierAmplitude)
 
-  const playNote = ({ amplitude, pitch, modIndex, harmonicity }) => {
+  const playNote = ({ amplitude, pitch, modIndex, harmonicity } = {}) => {
     [carrierFrequency.gain, carrierAmplitude.gain, modulationIndex.gain, harmonicityRatio.gain]
       .forEach(param => param.cancelAndHoldAtTime(0))
 
