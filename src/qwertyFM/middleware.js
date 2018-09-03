@@ -1,10 +1,9 @@
+import apply from '../apply'
 import fmSynth from '../fm-synth'
 import midiNoteToF from '../midi-note-to-f'
 import OperatorFactory from '../operator-factory'
 import { ifAudioContext } from '../audio-context'
 import { amplitudeEnvelopeSelector, harmonicityEnvelopeSelector, modIndexEnvelopeSelector, pitchEnvelopeSelector, fixedPitchSelector } from './interactions'
-
-const apply = (f, x) => f(x)
 
 const playNote = ifAudioContext(audioContext => {
   const { playNote, connect } = fmSynth(OperatorFactory(audioContext))
