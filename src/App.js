@@ -1,13 +1,13 @@
 import React from 'react'
 import QwertyFM from './qwertyFM'
-import Melody from './melody'
+import Autoplayer from './autoplayer'
 
 const App = props => (
   <div style={{
     fontFamily: 'sans-serif'
   }}>
     <QwertyFM />
-    <Melody />
+    <Autoplayer />
   </div>
 )
 
