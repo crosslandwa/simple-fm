@@ -12,12 +12,14 @@ export const stopPlaying = () => ({ type: 'STOP_PLAYING' })
 
 /* MIDDLEWARE */
 
-const { playFm1, playFm2, playFm3 } = ifAudioContext(
+const { playFm1, playFm2, playFm3, playFm4, playFm5 } = ifAudioContext(
   audioContext => {
     const operatorFactory = OperatorFactory(audioContext)
     const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory)
     const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory)
     const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory)
+    const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory)
+    const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory)
 
     const panR = audioContext.createStereoPanner()
     panR.pan.setValueAtTime(0.75, 0)
@@ -30,9 +32,11 @@ const { playFm1, playFm2, playFm3 } = ifAudioContext(
     connectFm2(panL)
 
     connectFm3(audioContext.destination)
-    return { playFm1, playFm2, playFm3 }
+    connectFm4(audioContext.destination)
+    connectFm5(audioContext.destination)
+    return { playFm1, playFm2, playFm3, playFm4, playFm5 }
   },
-  { playFm1: () => {}, playFm2: () => {}, playFm3: () => {} }
+  { playFm1: () => {}, playFm2: () => {}, playFm3: () => {}, playFm4: () => {} }
 )
 
 export function middleware (store) {
@@ -42,17 +46,23 @@ export function middleware (store) {
         playWithLSystem(playFm1)
         playWithLSystem(playFm2)
         playBassWithLSystem(playFm3)
+        playKick(playFm4)
+        playSnare(playFm5)
         return
       case 'PAUSE_PLAYING':
         playFm1()
         playFm2()
         playFm3()
+        playFm4()
+        playFm5()
         return
       case 'STOP_PLAYING':
         const stop = { amplitude: 0.001 } // TODO handle edge case (in FM synth) where single value of zero passed
         playFm1(stop)
         playFm2(stop)
         playFm3(stop)
+        playFm4(stop)
+        playFm5(stop)
         return
     }
     return next(action)
@@ -127,7 +137,38 @@ const playBassWithLSystem = play => {
     const noteNumber = { A: 2, B: 3, C: 5, D: 7, E: 9, F: 12, G: 15, H: 24 }[key] || 7
     return [[midiNoteToF(noteNumber + 24), 1], [midiNoteToF(noteNumber + 24), 1999]]
   }
-  const pitch = randomLSystem(4).apply(5).split('').reduce((acc, i) => acc.concat(pitchSegment(i)), [])
+  const pitch = randomLSystem(6).apply(5).split('').reduce((acc, i) => acc.concat(pitchSegment(i)), [])
 
   play({amplitude, pitch, modIndex: 5, harmonicity: 1})
+}
+
+const envLength = env => env.reduce((acc, [x, t]) => acc + t, 0)
+const padLength = (env, targetLength) => env.concat([[env.slice(-1)[0][0], Math.max(0, targetLength - envLength(env))]])
+const trimEnvelope = (env, maxLength) => env.slice(
+  0,
+  env.reduce((acc, [x, t]) => ({ max: acc.length + t < maxLength ? acc.max + 1 : acc.max, length: acc.length + t}), { max: 0, length: 0}).max
+)
+
+const playKick = play => {
+  const ampEnv = [[1, 1], [0.05, 50], [0, 200]]
+  const harmonicityEnv = [[50.1, 0], [0, 5]]
+
+  const noteLengths = { A: 250, B: 500, C: 750, D: 125, E: 1000, F: 75.5, G: 1250, H: 1250, I: 250  }
+
+  const sequence = randomLSystem(9).apply(5).split('')
+
+  const amplitude = sequence.reduce((acc, i) => acc.concat(padLength(trimEnvelope(ampEnv, noteLengths[i]), noteLengths[i])), [])
+  const harmonicity = sequence.reduce((acc, i) => acc.concat(padLength(trimEnvelope(harmonicityEnv, noteLengths[i]), noteLengths[i])), [])
+
+  play({amplitude, pitch: 70, modIndex: 0.5, harmonicity})
+}
+
+const playSnare = play => {
+  const amp = [[0, 0], [0, 500], [0.25, 1], [0, 100], [0, 399]]
+  const h = [[0, 0], [0, 500], [1.1, 0], [0.3, 500]]
+
+  const amplitude = [...new Array(100).keys()].reduce((acc, it) => acc.concat(amp), [])
+  const harmonicity = [...new Array(100).keys()].reduce((acc, it) => acc.concat(h), [])
+
+  play({amplitude, pitch: 1800, modIndex: 12, harmonicity})
 }
