@@ -12,37 +12,42 @@ export const stopPlaying = () => ({ type: 'STOP_PLAYING' })
 
 /* MIDDLEWARE */
 
-const { playFm1, playFm2, playFm3, playFm4, playFm5 } = ifAudioContext(
-  audioContext => {
-    const operatorFactory = OperatorFactory(audioContext)
-    const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory)
-    const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory)
-    const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory)
-    const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory)
-    const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory)
+let playFm1, playFm2, playFm3, playFm4, playFm5
 
-    const panR = audioContext.createStereoPanner()
-    panR.pan.setValueAtTime(0.75, 0)
-    panR.connect(audioContext.destination)
-    connectFm1(panR)
+function startAudio () {
+  ({ playFm1, playFm2, playFm3, playFm4, playFm5 } = ifAudioContext(
+    audioContext => {
+      const operatorFactory = OperatorFactory(audioContext)
+      const { playNote: playFm1, connect: connectFm1 } = fmSynth(operatorFactory)
+      const { playNote: playFm2, connect: connectFm2 } = fmSynth(operatorFactory)
+      const { playNote: playFm3, connect: connectFm3 } = fmSynth(operatorFactory)
+      const { playNote: playFm4, connect: connectFm4 } = fmSynth(operatorFactory)
+      const { playNote: playFm5, connect: connectFm5 } = fmSynth(operatorFactory)
 
-    const panL = audioContext.createStereoPanner()
-    panL.pan.setValueAtTime(-0.75, 0)
-    panL.connect(audioContext.destination)
-    connectFm2(panL)
+      const panR = audioContext.createStereoPanner()
+      panR.pan.setValueAtTime(0.75, 0)
+      panR.connect(audioContext.destination)
+      connectFm1(panR)
 
-    connectFm3(audioContext.destination)
-    connectFm4(audioContext.destination)
-    connectFm5(audioContext.destination)
-    return { playFm1, playFm2, playFm3, playFm4, playFm5 }
-  },
-  { playFm1: () => {}, playFm2: () => {}, playFm3: () => {}, playFm4: () => {} }
-)
+      const panL = audioContext.createStereoPanner()
+      panL.pan.setValueAtTime(-0.75, 0)
+      panL.connect(audioContext.destination)
+      connectFm2(panL)
+
+      connectFm3(audioContext.destination)
+      connectFm4(audioContext.destination)
+      connectFm5(audioContext.destination)
+      return { playFm1, playFm2, playFm3, playFm4, playFm5 }
+    },
+    { playFm1: () => {}, playFm2: () => {}, playFm3: () => {}, playFm4: () => {} }
+  ))
+}
 
 export function middleware (store) {
   return (next) => (action) => {
     switch (action.type) {
       case 'START_PLAYING':
+        if (!playFm1) startAudio()
         playWithLSystem(playFm1)
         playWithLSystem(playFm2)
         playBassWithLSystem(playFm3)
@@ -146,14 +151,14 @@ const envLength = env => env.reduce((acc, [x, t]) => acc + t, 0)
 const padLength = (env, targetLength) => env.concat([[env.slice(-1)[0][0], Math.max(0, targetLength - envLength(env))]])
 const trimEnvelope = (env, maxLength) => env.slice(
   0,
-  env.reduce((acc, [x, t]) => ({ max: acc.length + t < maxLength ? acc.max + 1 : acc.max, length: acc.length + t}), { max: 0, length: 0}).max
+  env.reduce((acc, [x, t]) => ({ max: acc.length + t < maxLength ? acc.max + 1 : acc.max, length: acc.length + t }), { max: 0, length: 0 }).max
 )
 
 const playKick = play => {
   const ampEnv = [[1, 1], [0.05, 50], [0, 200]]
   const harmonicityEnv = [[50.1, 0], [0, 5]]
 
-  const noteLengths = { A: 250, B: 500, C: 750, D: 125, E: 1000, F: 75.5, G: 1250, H: 1250, I: 250  }
+  const noteLengths = { A: 250, B: 500, C: 750, D: 125, E: 1000, F: 75.5, G: 1250, H: 1250, I: 250 }
 
   const sequence = randomLSystem(9).apply(5).split('')
 

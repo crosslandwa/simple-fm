@@ -23,7 +23,26 @@ export default {
     commonjs({
       include: 'node_modules/**',
       namedExports: {
-        'node_modules/react/index.js': ['Component', 'PureComponent', 'Fragment', 'Children', 'createElement']
+        'node_modules/react/index.js': [
+          'Component',
+          'PureComponent',
+          'Fragment',
+          'Children',
+          'createElement',
+          'useContext',
+          'useEffect',
+          'useLayoutEffect',
+          'useMemo',
+          'useReducer',
+          'useRef'
+        ],
+        'node_modules/react-dom/index.js': [
+          'unstable_batchedUpdates'
+        ],
+        'node_modules/react-is/index.js': [
+          'isContextConsumer',
+          'isValidElementType'
+        ]
       }
     }),
     postcss({

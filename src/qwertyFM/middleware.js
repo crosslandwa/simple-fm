@@ -5,17 +5,22 @@ import OperatorFactory from '../operator-factory'
 import { ifAudioContext } from '../audio-context'
 import { amplitudeEnvelopeSelector, harmonicityEnvelopeSelector, modIndexEnvelopeSelector, pitchEnvelopeSelector, fixedPitchSelector } from './interactions'
 
-const playNote = ifAudioContext(audioContext => {
-  const { playNote, connect } = fmSynth(OperatorFactory(audioContext))
-  connect(audioContext.destination)
-  return playNote
-}, () => {})
+let playNote
+
+function startAudio () {
+  playNote = ifAudioContext(audioContext => {
+    const { playNote, connect } = fmSynth(OperatorFactory(audioContext))
+    connect(audioContext.destination)
+    return playNote
+  }, () => {})
+}
 
 const scaleEnvelope = (env, scaleFactor) => env.map(([a, b]) => [a * scaleFactor, b])
 
 export const qwertyFMMiddleware = (store) => (next) => (action) => {
   switch (action.type) {
     case 'QWERTY_FM_PLAY_NOTE':
+      if (!playNote) startAudio()
       const frequency = midiNoteToF(action.noteNumber)
       playNote({
         amplitude: amplitudeEnvelopeSelector(store.getState()),
