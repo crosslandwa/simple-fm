@@ -1,5 +1,4 @@
 dist/bundle*
-package-lock.json
 
 # Logs
 logs
