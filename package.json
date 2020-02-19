@@ -36,7 +36,7 @@
     "rollup-plugin-replace": "^2.0.0"
   },
   "dependencies": {
-    "push-wrapper": "^2.2.0",
+    "push-wrapper": "^2.3.1",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-redux": "^5.0.7",
